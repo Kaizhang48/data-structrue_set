@@ -1,22 +1,10 @@
-// test_binary_tree.cpp : Defines the entry point for the console application.
-//
-
-#include "stdafx.h"
-// tree_example_wd.cpp
-// compile with
-// c++ -o t_e_wd tree_example_wd.cpp -std=c++11
-// execute with
-// ./t_e_wd
-//
-// This code contains the function that deletes a node from the tree.
-//
+//writen by KAIZHANG
 #include<iostream>
-#include<stdexcept>
 using namespace std;
 
 typedef long int myint;
 class Frac {
-	friend ostream& operator<<(ostream& , const Frac& );
+	friend ostream& operator<<(ostream&, const Frac&);
 private:
 	myint num;
 	myint den;
@@ -30,8 +18,8 @@ public:
 	void setDen(const myint &);
 	myint operator<(const Frac &) const;
 	myint operator>(const Frac &) const;
-
 };
+
 Frac::Frac(const myint& _num, const myint &_den) {
 	num = _num;
 	den = _den;
@@ -67,18 +55,51 @@ myint Frac::operator>(const Frac &_cW) const {
 	return 0;
 }
 
+ostream& operator<<(ostream& os, const Frac& a) {
+	os << a.getNum() << "/" << a.getDen();
+	return os;
+}
+
+//==========THIS IS TREE======================================
 class TNode {
-	friend ostream& operator<<(ostream& , TNode* );
+	friend ostream& operator<<(ostream&, TNode*);
 public:
 	Frac value;
 	TNode * lChild;
 	TNode * rChild;
 	TNode();
-
 };
+
 TNode::TNode() {
 	lChild = nullptr;
 	rChild = nullptr;
+}
+
+TNode* copytree(TNode* root)
+{
+	TNode* newnode;
+	if (root == nullptr)
+		return nullptr;
+	else
+	{
+		newnode = new TNode;    
+		newnode->value = root->value;
+		newnode->lChild = copytree(root->lChild);        
+		newnode->rChild = copytree(root->rChild);          
+		return newnode;                              
+	}
+}
+
+void deleteBST(TNode** root) {
+	if ((*root) == nullptr) {
+		return;
+	}
+	deleteBST(&((*root)->lChild));
+	deleteBST(&((*root)->rChild));
+	if ((*root)->lChild == nullptr && (*root)->rChild == nullptr) {
+		delete (*root);
+		*root = nullptr;
+	}
 }
 
 void insert(TNode*& root, const Frac& fr) {
@@ -98,7 +119,7 @@ void insert(TNode*& root, const int& b, const int&c = 1) {
 
 TNode*& findnode(TNode* &root, const Frac& a) {
 	if (root == nullptr) {
-		throw out_of_range("root can not be nullptr!");
+		return root;
 	}
 	if (a < root->value) {
 		findnode(root->lChild, a);
@@ -110,6 +131,7 @@ TNode*& findnode(TNode* &root, const Frac& a) {
 		return root;
 	}
 }
+
 int pop_up(TNode* &root, const Frac& v) {
 	TNode* &target = findnode(root, v);
 	if (target != nullptr) {
@@ -119,11 +141,11 @@ int pop_up(TNode* &root, const Frac& v) {
 				while (helper->lChild != nullptr) {
 					helper = helper->lChild;
 				}
-				auto temp=helper->value;
+				auto temp = helper->value;
 				pop_up(root, temp);
 				target->value = temp;
 			}
-			else {//lChildÓÐ, rChildÃ»ÓÐ
+			else {//lChildÃ“Ã, rChildÃƒÂ»Ã“Ã
 				TNode* temp = target;
 				target = temp->lChild;
 				auto templ = temp->lChild;
@@ -153,29 +175,11 @@ int pop_up(TNode* &root, const Frac& v) {
 	}
 }
 
-
-
-void printAll(TNode * root) {
-	if (root != nullptr) {
-		printAll(root->lChild);
-		std::cout << (root->value).getNum();
-		std::cout << "/";
-		std::cout << (root->value).getDen();
-		std::cout << " ";
-		printAll(root->rChild);
-	}
-}
-
-ostream& operator<<(ostream& os, const Frac& a) {
-	os << a.getNum() << "/" << a.getDen();
-	return os;
-}
-
 void printAll(ostream& os, TNode* root) {
 	if (root != nullptr) {
-		printAll(os,root->lChild);
+		printAll(os, root->lChild);
 		os << root->value << " ";
-		printAll(os,root->rChild);
+		printAll(os, root->rChild);
 	}
 }
 
@@ -186,60 +190,127 @@ ostream& operator<<(ostream& os, TNode* root) {
 
 void check(TNode* t) {
 	if (t->lChild == nullptr) {
-		cout << "no left child" << endl;
+		cout << t->value << " no left child" << ", ";
 	}
 	else {
-		cout << "have left child" << endl;
-		
+		cout << t->value << " have left child: ";
+
 		auto re = t->lChild;
 		TNode ree = *re;
 		Frac reee = ree.value;
 
-		cout << "left child is: " << reee << endl;
-		
+		cout << reee << ", ";
+
 	}
 	if (t->rChild == nullptr) {
-		cout << "no right child" << endl;
+		cout << " no right child" << endl;
 	}
 	else {
-		cout << "have right child" << endl;
-		
+		cout << " have right child: ";
+
 		auto re = t->rChild;
 		TNode ree = *re;
 		Frac reee = ree.value;
 
-		cout << "right child is: " << reee << endl;
+		cout << reee << endl;
 	}
 }
+//===============THIS IS SET=======================================
+class SetOfFractions {
+	friend ostream& operator<<(ostream&, SetOfFractions);
+private:
+	TNode* root;
+public:
+	SetOfFractions();
+	SetOfFractions(const SetOfFractions &);
+	SetOfFractions(SetOfFractions &&);
+	void operator=(const SetOfFractions &);
+	void operator=(SetOfFractions &&);
+	myint isElement(const Frac &) ;
+	bool pop_up(const Frac&);
+	void insertInS(const Frac &);
+	void printAllFractions() const;
+	~SetOfFractions();
+};
 
+bool pop_up(const Frac& target){
+     return pop_up(root, target)
+}
 
-int main() {
-	myint a, b, c;
-	Frac tempFr;
-	TNode *root;
-	root = nullptr;
-	insert(root, 19);
-	insert(root, 37);
-	insert(root, 9);
-	insert(root, 15);
-	insert(root, 5);
-	insert(root, 7);
-	insert(root, 3);
-	insert(root,12);
-	insert(root,10);
-	insert(root,13);
-	insert(root,14);
-	pop_up(root, 5);
-	system("PAUSE");
-	check(findnode(root,7));
-	system("PAUSE");
-	cout << root << endl;
-	system("PAUSE");
-	pop_up(root, 7);
-	system("PAUSE");
-	check(findnode(root, 9));
-	system("PAUSE");
-	cout << root << endl;
-	system("PAUSE");
+ostream& operator<<(ostream& os, SetOfFractions a) {
+	os << a.root;
+	return os;
+}
+
+SetOfFractions::SetOfFractions() : root(nullptr) {}
+
+SetOfFractions::SetOfFractions(const SetOfFractions& copyfrom) {
+	root = new TNode;
+	root = copytree(copyfrom.root);
+}
+
+SetOfFractions::SetOfFractions(SetOfFractions && movefrom) {
+	root = movefrom.root;
+	movefrom.root = nullptr;
+}
+
+void SetOfFractions::operator=(const SetOfFractions& assigment) {
+	deleteBST(&root);
+	root = new TNode;
+	root = copytree(assigment.root);
+}
+
+void SetOfFractions::operator=(SetOfFractions && moverassignment) {
+	TNode* temp = root;
+	deleteBST(&temp);
+	delete temp;
+	deleteBST(&root);
+	delete root;
+	root = moverassignment.root;
+	moverassignment.root = nullptr;
+}
+ 
+myint SetOfFractions::isElement(const Frac& el) {
+	TNode* temp = findnode(root, el);
+	if (temp != nullptr) {
+		return 1;
+	}
+	return 0;
+}
+
+ void SetOfFractions::insertInS(const Frac& fr) {
+	 insert(root, fr);
+}
+
+ void SetOfFractions::printAllFractions()const {
+	 cout << root << endl;
+ }
+ 
+ SetOfFractions::~SetOfFractions() {
+	 deleteBST(&root);
+	 delete root;
+ }
+
+int main() 
+{
+	Frac a(3, 2);
+	Frac b(4, 3);
+	Frac c(7, 3);
+	Frac d(8, 7);
+	cout << a << b << c << d << endl;
+	SetOfFractions aa;
+	aa.insertInS(a);
+	aa.insertInS(b);
+	aa.insertInS(c);
+	aa.insertInS(d);
+	SetOfFractions bb = aa;
+	cout << aa << endl;
+	cout << "bb is(in order to see if copy constructor works):" << endl;
+	cout << bb << endl;
+	SetOfFractions cc;
+	cc = aa;
+	cout << "cc is(in order to see if copy assignment works): " << endl;
+	cout << cc << endl;
+
 	return 0;
 }
